@@ -10,7 +10,7 @@ int  = 0;
 
 */
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*
 	these are apparently language keywords, not attributes...
@@ -45,6 +45,34 @@ int access_ = 1;
 #else
 int access_ = 0;
 #endif
+
+#if __has_attribute(nocommon)
+int nocommon = 1;
+#else
+int nocommon = 0;
+#endif
+
+#if __has_attribute(no_sanitize_thread)
+int no_sanitize_thread = 1;
+#else
+int no_sanitize_thread = 0;
+#endif
+
+#if __has_attribute(cdecl)
+int cdecl = 1;
+#else
+int cdecl = 0;
+#endif
+
+#if __has_attribute(pcs)
+int pcs = 1;
+#else
+int pcs = 0;
+#endif
+
+
+
+#if !DEBUG
 
 #if __has_attribute(alias)
 int alias = 1;
@@ -98,12 +126,6 @@ int attr = 0;
 int availability = 1;
 #else
 int availability = 0;
-#endif
-
-#if __has_attribute(cdecl)
-int cdecl = 1;
-#else
-int cdecl = 0;
 #endif
 
 #if __has_attribute(cleanup)
@@ -298,12 +320,6 @@ int no_sanitize_memory = 1;
 int no_sanitize_memory = 0;
 #endif
 
-#if __has_attribute(no_sanitize_thread)
-int no_sanitize_thread = 1;
-#else
-int no_sanitize_thread = 0;
-#endif
-
 #if __has_attribute(no_sanitize_undefined)
 int no_sanitize_undefined = 1;
 #else
@@ -320,12 +336,6 @@ int no_stack_protector = 0;
 int no_thread_safety_analysis = 1;
 #else
 int no_thread_safety_analysis = 0;
-#endif
-
-#if __has_attribute(nocommon)
-int nocommon = 1;
-#else
-int nocommon = 0;
 #endif
 
 #if __has_attribute(nodebug)
@@ -392,12 +402,6 @@ int packed_tv = 0;
 int pass_object_size = 1;
 #else
 int pass_object_size = 0;
-#endif
-
-#if __has_attribute(pcs)
-int pcs = 1;
-#else
-int pcs = 0;
 #endif
 
 #if __has_attribute(preferred_name)
@@ -544,11 +548,14 @@ int weak_import = 1;
 int weak_import = 0;
 #endif
 
+#endif /* !DEBUG */
+
 int main(void)
 {
 	printf("The compiler that compiled this executable has the following attributes:\n");
 	printf(
 "access\t%i\n"
+#if !DEBUG
 "alias\t%i\n"
 "aligned\t\t%i\n"
 "always_inline\t%i\n"
@@ -567,7 +574,12 @@ int main(void)
 "malloc\t%i\n"
 "may_alias\t%i\n"
 "mode\t%i\n"
-"no_instrument_function\t%i\n",
+"no_instrument_function\t%i\n"
+#endif /* !DEBUG */
+,
+#if DEBUG
+	access_
+#else
 	access_,
 	alias,
 	aligned_tv,
@@ -587,10 +599,13 @@ int main(void)
 	malloc_attr,
 	may_alias,
 	mode,
-	no_instrument_function);
+	no_instrument_function
+#endif /* DEBUG */
+);
 
 	printf(
 "nocommon\t%i\n"
+#if !DEBUG
 "noinline\t%i\n"
 "nonnull\t\t%i\n"
 "noreturn\t%i\n"
@@ -613,7 +628,12 @@ int main(void)
 
 "\n * Windows only:\n"
 "dllexport\t%i\n"
-"dllimport\t%i\n",
+"dllimport\t%i\n"
+#endif /* !DEBUG */
+,
+#if DEBUG
+	nocommon
+#else
 	nocommon,
 	noinline,
 	nonnull,
@@ -635,7 +655,9 @@ int main(void)
 	weak_fv,
 	weak_import,
 	dllexport,
-	dllimport);
+	dllimport
+#endif /* DEBUG */
+);
 
 
 	/* printf("\\nnullability attributes:\n"
@@ -648,6 +670,7 @@ int main(void)
 
 	printf("\n * from clang/llvm, used in NDK headers:\n"
 "abi_tag\t\t%i\n"
+#if !DEBUG
 "alloc_align\t%i\n"
 "alloc_size\t%i\n"
 "analyzer_noreturn\t%i\n"
@@ -667,7 +690,12 @@ int main(void)
 "no_destroy\t%i\n"
 "no_profile_instrument_function\t%i\n"
 "no_sanitize\t%i\n"
-"no_sanitize_memory\t%i\n",
+"no_sanitize_memory\t%i\n"
+#endif /* !DEBUG */
+,
+#if DEBUG
+	abi_tag
+#else
 	abi_tag,
 	alloc_align,
 	alloc_size,
@@ -688,10 +716,13 @@ int main(void)
 	no_destroy,
 	no_profile_instrument_function,
 	no_sanitize,
-	no_sanitize_memory);
+	no_sanitize_memory
+#endif /* DEBUG */
+);
 
 	printf(
 "no_sanitize_thread\t%i\n"
+#if !DEBUG
 "no_sanitize_undefined\t%i\n"
 "no_stack_protector\t%i\n"
 "no_thread_safety_analysis\t%i\n"
@@ -710,7 +741,12 @@ int main(void)
 "unavailable\t%i\n"
 "using_if_exists\t%i\n"
 "visibility\t%i\n"
-"warning\t\t%i\n",
+"warning\t\t%i\n"
+#endif /* !DEBUG */
+,
+#if DEBUG
+	no_sanitize_thread
+#else
 	no_sanitize_thread,
 	no_sanitize_undefined,
 	no_stack_protector,
@@ -730,14 +766,19 @@ int main(void)
 	unavailable,
 	using_if_exists,
 	visibility,
-	warning);
+	warning
+#endif /* DEBUG */
+);
 
+#if !DEBUG
 	printf("\n * architecture-specific attributes:\n"
 "cdecl (x86)\t%i\n"
-"pcs (arm)\t%i\n",
+"pcs (arm)\t%i\n"
+,
 	cdecl,
-	pcs);
-
+	pcs
+);
+#endif /* !DEBUG */
 	return 0;
 }
 
